@@ -3,14 +3,25 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 
 sourceCompatibility = 1.6
+group = 'com.example'
 version = '1.0.0-SNAPSHOT'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task showRepos << {
+    println "All repos:"
+    println repositories.collect { it.url }
+}
+
+task printEnv << {
+    println "User Home: $System.env.HOME"
+    println "User Gradle: $System.env.GRADLE_USER_HOME"
 }
 
 task wrapper(type: Wrapper) {
