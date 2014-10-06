@@ -27,6 +27,8 @@
 		<vaadin.version>7.3.2</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<spring4vaadin.version>0.0.3-SNAPSHOT</spring4vaadin.version>
+		<springboot.version>${project.parent.version}</springboot.version>
+		<springloaded.version>1.2.0.RELEASE</springloaded.version>
 	</properties>
 
 	<dependencies>
@@ -54,10 +56,6 @@
 					<artifactId>spring-boot-starter-tomcat</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>springloaded</artifactId>
 		</dependency>
 		<dependency>
 		<groupId>org.springframework.boot</groupId>
@@ -101,12 +99,27 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>org.springframework</groupId>
+						<artifactId>springloaded</artifactId>
+						<version>${springloaded.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<jvmArguments>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</jvmArguments>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

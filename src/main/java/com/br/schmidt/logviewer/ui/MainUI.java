@@ -8,11 +8,14 @@ import org.vaadin.spring.VaadinUI;
 import org.vaadin.spring.i18n.I18N;
 
 import com.vaadin.annotations.Title;
+import com.vaadin.data.Property;
 import com.vaadin.data.util.FilesystemContainer;
+import com.vaadin.data.util.TextFileProperty;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.Tree;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 
 /**
@@ -23,22 +26,43 @@ import com.vaadin.ui.UI;
 @Title("LogViewer")
 public class MainUI extends UI {
 
+	private static class FilenameFilter implements java.io.FilenameFilter {
+		@Override
+		public boolean accept(final File dir, final String name) {
+			final File file = new File(dir, name);
+			return !file.isDirectory() && name.endsWith("log");
+		}
+	}
+
+	private FilesystemContainer container;
+	private Table fileList;
+	private Label fileView;
+
 	@Inject
 	private I18N i18n;
 
 	@Override
 	protected void init(final VaadinRequest request) {
-		HorizontalLayout layout = new HorizontalLayout();
-		setContent(layout);
-		//setContent(new Label(i18n.get("label.hello")));
+		container = new FilesystemContainer(new File("/DevTools-v6_x64/var/was7_profile/Dev/logs"),
+				new FilenameFilter(), true);
 
-		FilesystemContainer container = new FilesystemContainer(new File("/DevTools-v6_x64/var/was7_profile/Dev/logs"),
-				"log", true);
-		Tree tree = new Tree("Files", container);
-		ListSelect listSelect = new ListSelect("Files", container);
+		fileList = new Table("Logs", container);
+		fileView = new Label("", ContentMode.PREFORMATTED);
 
-		layout.addComponent(tree);
-		layout.addComponent(listSelect);
+		HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
+		setContent(splitPanel);
+		splitPanel.addComponent(fileList);
+		splitPanel.addComponent(fileView);
+
+		fileList.addValueChangeListener(new Property.ValueChangeListener() {
+			@Override
+			public void valueChange(Property.ValueChangeEvent event) {
+				fileView.setPropertyDataSource(new TextFileProperty((File) event.getProperty().getValue()));
+			}
+		});
+
+		fileList.setImmediate(true);
+		fileList.setSelectable(true);
 	}
 
 }
