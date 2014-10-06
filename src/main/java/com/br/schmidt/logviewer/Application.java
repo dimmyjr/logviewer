@@ -1,4 +1,4 @@
-package com.bnpparibas.cardif.logviewer;
+package com.br.schmidt.logviewer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

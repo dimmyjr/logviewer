@@ -1,4 +1,4 @@
-package com.bnpparibas.cardif.logviewer;
+package com.br.schmidt.logviewer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

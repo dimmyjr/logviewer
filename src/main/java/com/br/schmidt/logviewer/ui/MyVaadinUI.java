@@ -1,4 +1,4 @@
-package com.bnpparibas.cardif.logviewer.ui;
+package com.br.schmidt.logviewer.ui;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.VaadinUI;
