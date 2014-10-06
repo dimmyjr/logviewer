@@ -23,12 +23,20 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<start-class>com.br.schmidt.logviewer.Application</start-class>
 		<java.version>1.7</java.version>
+		<javax.inject.version>1</javax.inject.version>
 		<vaadin.version>7.3.2</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<spring4vaadin.version>0.0.3-SNAPSHOT</spring4vaadin.version>
 	</properties>
 
 	<dependencies>
+		<!-- JSR-330 API (e.g., @Inject) -->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>${javax.inject.version}</version>
+		</dependency>
+
 		<!-- Vaadin4Spring -->
 		<dependency>
 			<groupId>org.vaadin.spring</groupId>
