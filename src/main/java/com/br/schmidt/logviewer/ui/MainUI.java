@@ -43,8 +43,8 @@ public class MainUI extends UI {
 
 	@Override
 	protected void init(final VaadinRequest request) {
-		container = new FilesystemContainer(new File("/DevTools-v6_x64/var/was7_profile/Dev/logs"),
-				new FilenameFilter(), true);
+		//TODO Get file path from???
+		container = new FilesystemContainer(new File("."), new FilenameFilter(), true);
 
 		fileList = new Table("Logs", container);
 		fileView = new Label("", ContentMode.PREFORMATTED);

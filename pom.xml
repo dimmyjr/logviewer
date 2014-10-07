@@ -29,6 +29,8 @@
 		<spring4vaadin.version>0.0.3-SNAPSHOT</spring4vaadin.version>
 		<springboot.version>${project.parent.version}</springboot.version>
 		<springloaded.version>1.2.0.RELEASE</springloaded.version>
+		<guava.version>18.0</guava.version>
+		<commons-io.version>2.4</commons-io.version>
 	</properties>
 
 	<dependencies>
@@ -58,7 +60,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-		<groupId>org.springframework.boot</groupId>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jetty</artifactId>
 		</dependency>
 		<dependency>
@@ -77,6 +79,20 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-client-compiled</artifactId>
 			<version>${vaadin.version}</version>
+		</dependency>
+
+		<!-- Apache Commons -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+		</dependency>
+
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
 		</dependency>
 	</dependencies>
 
