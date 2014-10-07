@@ -17,13 +17,16 @@ public class CreateFileTest {
 
 	public static void main(String[] args) throws InterruptedException {
 		File file = new File(FileConstants.FILENAME);
+		File file2 = new File(FileConstants.FILENAME_2);
 
 		try {
 			FileUtils.deleteQuietly(file);
+			FileUtils.deleteQuietly(file2);
 			int i = 0;
 			while (true) {
 				Files.append(i++ + " - " + new Date() + "\n", file, Charset.defaultCharset());
-				Thread.sleep(1000);
+				Thread.sleep(300);
+				Files.append(i++ + " - " + new Date() + "\n", file2, Charset.defaultCharset());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

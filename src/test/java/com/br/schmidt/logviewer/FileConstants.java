@@ -7,5 +7,6 @@ package com.br.schmidt.logviewer;
 public interface FileConstants {
 
 	String FILENAME = "tailer.log";
+	String FILENAME_2 = "tailer2.log";
 
 }

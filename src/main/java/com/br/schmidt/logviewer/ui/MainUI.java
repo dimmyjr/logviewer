@@ -19,9 +19,9 @@ import com.br.schmidt.logviewer.ui.util.CustomFilesystemContainer;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Title;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.FilesystemContainer;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -33,7 +33,7 @@ import com.vaadin.ui.UI;
  * @since 03/10/2014
  */
 @VaadinUI
-@Push
+@Push(transport = Transport.LONG_POLLING)
 @Title("LogViewer")
 public class MainUI extends UI {
 
@@ -45,10 +45,10 @@ public class MainUI extends UI {
 		}
 	}
 
-	public static final int DELAY = 2000;
+	public static final int DELAY = 1000;
 	public static final int INITIAL_DELAY = 500;
-	private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
-	private FilesystemContainer container;
+	private static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newScheduledThreadPool(10);
+	private CustomFilesystemContainer container;
 	@Inject
 	private I18N i18n;
 	private ScheduledFuture<?> jobHandle;
@@ -127,7 +127,10 @@ public class MainUI extends UI {
 		};
 
 		Tailer tailer = new Tailer(file, listener, DELAY, true);
-		jobHandle = executorService.scheduleWithFixedDelay(tailer, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
+		if (jobHandle != null) {
+			jobHandle.cancel(true);
+		}
+		jobHandle = EXECUTOR_SERVICE.scheduleWithFixedDelay(tailer, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
 	}
 
 }
