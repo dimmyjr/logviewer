@@ -49,16 +49,16 @@ public class MainUI extends UI {
 		HorizontalLayout layout = new HorizontalLayout() {
 			{
 				final Label fileView = new Label("", ContentMode.PREFORMATTED);
-				final Panel contentPanel = new Panel("Content") {
+				final Panel contentPanel = new Panel(i18n.get("label.content")) {
 					{
 						setContent(fileView);
 						setSizeFull();
 					}
 				};
 
-				final Panel filesPanel = new Panel("Files") {
+				final Panel filesPanel = new Panel(i18n.get("label.files")) {
 					{
-						final Table fileList = new Table("Logs", container) {
+						final Table fileList = new Table(i18n.get("label.logs"), container) {
 							{
 								setSizeFull();
 								setImmediate(true);
