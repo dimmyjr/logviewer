@@ -11,7 +11,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import com.br.schmidt.logviewer.common.Callback;
-import com.br.schmidt.logviewer.common.model.Tail;
+import com.br.schmidt.logviewer.model.Tail;
+import com.br.schmidt.logviewer.model.TailTaskReference;
 import com.br.schmidt.logviewer.service.TailService;
 
 /**
@@ -20,27 +21,6 @@ import com.br.schmidt.logviewer.service.TailService;
  */
 @Service
 public class TailServiceImpl implements TailService {
-
-	private static class TailRef implements Tail {
-
-		private TailRef(final ScheduledFuture<?> task) {
-			this.task = task;
-		}
-
-		public ScheduledFuture<?> getTask() {
-			return task;
-		}
-
-		private ScheduledFuture<?> task;
-
-		@Override
-		public boolean stop() {
-			if (task != null) {
-				return task.cancel(true);
-			}
-			return false;
-		}
-	}
 
 	public static final int DELAY = 1000;
 
@@ -60,7 +40,7 @@ public class TailServiceImpl implements TailService {
 		Tailer tailer = new Tailer(file, listener, DELAY, true);
 		final ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(tailer, DELAY);
 
-		return new TailRef(scheduledFuture);
+		return new TailTaskReference(scheduledFuture);
 	}
 
 	@Override

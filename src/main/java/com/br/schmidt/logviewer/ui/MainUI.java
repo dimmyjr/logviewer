@@ -8,7 +8,7 @@ import org.vaadin.spring.i18n.I18N;
 
 import com.br.schmidt.logviewer.common.Callback;
 import com.br.schmidt.logviewer.common.io.filter.LogFilter;
-import com.br.schmidt.logviewer.common.model.Tail;
+import com.br.schmidt.logviewer.model.Tail;
 import com.br.schmidt.logviewer.service.TailService;
 import com.br.schmidt.logviewer.ui.property.TailFileProperty;
 import com.br.schmidt.logviewer.ui.util.CustomFilesystemContainer;

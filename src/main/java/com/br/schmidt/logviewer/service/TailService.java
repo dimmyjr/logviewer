@@ -3,7 +3,7 @@ package com.br.schmidt.logviewer.service;
 import java.io.File;
 
 import com.br.schmidt.logviewer.common.Callback;
-import com.br.schmidt.logviewer.common.model.Tail;
+import com.br.schmidt.logviewer.model.Tail;
 
 /**
  * @author Diego Schmidt

@@ -1,4 +1,4 @@
-package com.br.schmidt.logviewer.common.model;
+package com.br.schmidt.logviewer.model;
 
 /**
  * @author Diego Schmidt
