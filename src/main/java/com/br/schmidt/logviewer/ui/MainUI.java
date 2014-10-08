@@ -21,7 +21,6 @@ import com.vaadin.annotations.Title;
 import com.vaadin.data.Property;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -33,7 +32,8 @@ import com.vaadin.ui.UI;
  * @since 03/10/2014
  */
 @VaadinUI
-@Push(transport = Transport.LONG_POLLING)
+//@Push(transport = Transport.LONG_POLLING)
+@Push
 @Title("LogViewer")
 public class MainUI extends UI {
 

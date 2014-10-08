@@ -28,6 +28,53 @@ import com.vaadin.util.FileTypeResolver;
 public class CustomFilesystemContainer implements Container.Hierarchical {
 
 	/**
+	 * List of the string identifiers for the available properties.
+	 */
+	public static Collection<String> FILE_PROPERTIES;
+	/**
+	 * String identifier of a file's "icon" property.
+	 */
+	public static String PROPERTY_ICON = "Icon";
+	/**
+	 * String identifier of a file's "last modified" property.
+	 */
+	public static String PROPERTY_LASTMODIFIED = "Last Modified";
+	/**
+	 * String identifier of a file's "name" property.
+	 */
+	public static String PROPERTY_NAME = "Name";
+	/**
+	 * String identifier of a file's "size" property.
+	 */
+	public static String PROPERTY_SIZE = "Size";
+	private FilenameFilter filter = null;
+	private boolean recursive = true;
+	private File[] roots = new File[] {};
+
+	private final static Method FILEITEM_ICON;
+	private final static Method FILEITEM_LASTMODIFIED;
+	private final static Method FILEITEM_NAME;
+	private final static Method FILEITEM_SIZE;
+
+	static {
+
+		FILE_PROPERTIES = new ArrayList<String>();
+		FILE_PROPERTIES.add(PROPERTY_NAME);
+		//FILE_PROPERTIES.add(PROPERTY_ICON);
+		FILE_PROPERTIES.add(PROPERTY_SIZE);
+		//FILE_PROPERTIES.add(PROPERTY_LASTMODIFIED);
+		FILE_PROPERTIES = Collections.unmodifiableCollection(FILE_PROPERTIES);
+		try {
+			FILEITEM_LASTMODIFIED = FileItem.class.getMethod("lastModified", new Class[] {});
+			FILEITEM_NAME = FileItem.class.getMethod("getName", new Class[] {});
+			FILEITEM_ICON = FileItem.class.getMethod("getIcon", new Class[] {});
+			FILEITEM_SIZE = FileItem.class.getMethod("getSize", new Class[] {});
+		} catch (final NoSuchMethodException e) {
+			throw new RuntimeException("Internal error finding methods in CustomFilesystemContainer");
+		}
+	}
+
+	/**
 	 * A Item wrapper for files in a filesystem.
 	 *
 	 * @author Vaadin Ltd.
@@ -211,53 +258,6 @@ public class CustomFilesystemContainer implements Container.Hierarchical {
 		}
 
 	}
-
-	private final static Method FILEITEM_ICON;
-	private final static Method FILEITEM_LASTMODIFIED;
-	private final static Method FILEITEM_NAME;
-	private final static Method FILEITEM_SIZE;
-
-	static {
-
-		FILE_PROPERTIES = new ArrayList<String>();
-		FILE_PROPERTIES.add(PROPERTY_NAME);
-		//FILE_PROPERTIES.add(PROPERTY_ICON);
-		FILE_PROPERTIES.add(PROPERTY_SIZE);
-		//FILE_PROPERTIES.add(PROPERTY_LASTMODIFIED);
-		FILE_PROPERTIES = Collections.unmodifiableCollection(FILE_PROPERTIES);
-		try {
-			FILEITEM_LASTMODIFIED = FileItem.class.getMethod("lastModified", new Class[] {});
-			FILEITEM_NAME = FileItem.class.getMethod("getName", new Class[] {});
-			FILEITEM_ICON = FileItem.class.getMethod("getIcon", new Class[] {});
-			FILEITEM_SIZE = FileItem.class.getMethod("getSize", new Class[] {});
-		} catch (final NoSuchMethodException e) {
-			throw new RuntimeException("Internal error finding methods in CustomFilesystemContainer");
-		}
-	}
-
-	/**
-	 * List of the string identifiers for the available properties.
-	 */
-	public static Collection<String> FILE_PROPERTIES;
-	/**
-	 * String identifier of a file's "icon" property.
-	 */
-	public static String PROPERTY_ICON = "Icon";
-	/**
-	 * String identifier of a file's "last modified" property.
-	 */
-	public static String PROPERTY_LASTMODIFIED = "Last Modified";
-	/**
-	 * String identifier of a file's "name" property.
-	 */
-	public static String PROPERTY_NAME = "Name";
-	/**
-	 * String identifier of a file's "size" property.
-	 */
-	public static String PROPERTY_SIZE = "Size";
-	private FilenameFilter filter = null;
-	private boolean recursive = true;
-	private File[] roots = new File[] {};
 
 	/**
 	 * Constructs a new <code>FileSystemContainer</code> with the specified file
