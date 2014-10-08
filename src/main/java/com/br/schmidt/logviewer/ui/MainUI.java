@@ -1,19 +1,15 @@
 package com.br.schmidt.logviewer.ui;
 
 import java.io.File;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
-import org.apache.commons.io.input.Tailer;
-import org.apache.commons.io.input.TailerListener;
-import org.apache.commons.io.input.TailerListenerAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.VaadinUI;
 import org.vaadin.spring.i18n.I18N;
 
+import com.br.schmidt.logviewer.common.Callback;
+import com.br.schmidt.logviewer.common.io.filter.LogFilter;
+import com.br.schmidt.logviewer.common.model.Tail;
+import com.br.schmidt.logviewer.service.TailService;
 import com.br.schmidt.logviewer.ui.property.TailFileProperty;
 import com.br.schmidt.logviewer.ui.util.CustomFilesystemContainer;
 import com.vaadin.annotations.Push;
@@ -32,31 +28,23 @@ import com.vaadin.ui.UI;
  * @since 03/10/2014
  */
 @VaadinUI
-//@Push(transport = Transport.LONG_POLLING)
 @Push
 @Title("LogViewer")
 public class MainUI extends UI {
 
-	private static class FilenameFilter implements java.io.FilenameFilter {
-		@Override
-		public boolean accept(final File dir, final String name) {
-			final File file = new File(dir, name);
-			return !file.isDirectory() && name.endsWith("log");
-		}
-	}
-
-	public static final int DELAY = 1000;
-	public static final int INITIAL_DELAY = 500;
-	private static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newScheduledThreadPool(10);
 	private CustomFilesystemContainer container;
-	@Inject
+	private Tail tail;
+
+	@Autowired
 	private I18N i18n;
-	private ScheduledFuture<?> jobHandle;
+
+	@Autowired
+	private TailService tailService;
 
 	@Override
 	protected void init(final VaadinRequest request) {
 		//TODO Get file path from???
-		container = new CustomFilesystemContainer(new File("."), new FilenameFilter(), true);
+		container = new CustomFilesystemContainer(new File("."), new LogFilter(), true);
 
 		HorizontalLayout layout = new HorizontalLayout() {
 			{
@@ -101,9 +89,7 @@ public class MainUI extends UI {
 
 	@Override
 	public void detach() {
-		if (jobHandle != null) {
-			jobHandle.cancel(true);
-		}
+		tailService.stopTail(tail);
 		super.detach();
 	}
 
@@ -111,9 +97,11 @@ public class MainUI extends UI {
 		final TailFileProperty tailFileProperty = new TailFileProperty();
 		fileView.setPropertyDataSource(tailFileProperty);
 
-		TailerListener listener = new TailerListenerAdapter() {
+		tailService.stopTail(tail);
+
+		tail = tailService.startTail(file, new Callback<String>() {
 			@Override
-			public void handle(final String line) {
+			public void execute(final String line) {
 				access(new Runnable() {
 					@Override
 					public void run() {
@@ -124,13 +112,8 @@ public class MainUI extends UI {
 					}
 				});
 			}
-		};
+		});
 
-		Tailer tailer = new Tailer(file, listener, DELAY, true);
-		if (jobHandle != null) {
-			jobHandle.cancel(true);
-		}
-		jobHandle = EXECUTOR_SERVICE.scheduleWithFixedDelay(tailer, INITIAL_DELAY, DELAY, TimeUnit.MILLISECONDS);
 	}
 
 }
