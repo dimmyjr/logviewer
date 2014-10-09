@@ -37,5 +37,6 @@ com_crashlytics_export_strings.xml
 .gradle/
 gradle/
 build/
+target/
 
 *.log
