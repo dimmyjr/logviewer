@@ -1,6 +1,6 @@
 package com.br.schmidt.logviewer.model;
 
-import com.br.schmidt.logviewer.common.io.input.Tailer;
+import org.apache.commons.io.input.Tailer;
 
 /**
  * @author Diego Schmidt
