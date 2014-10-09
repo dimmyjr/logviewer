@@ -1,12 +1,12 @@
 package com.br.schmidt.logviewer.service.impl;
 
 import java.io.File;
-import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.apache.commons.io.input.TailerListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +27,11 @@ public class TailServiceImpl implements TailService {
 	@Autowired
 	private ThreadPoolTaskScheduler scheduler;
 
+	@Autowired
+	private ThreadPoolTaskExecutor taskExecutor;
+
 	@Override
-	public Tail startTail(final File file, final Callback<String> callback) {
+	public Tail startTail(final File file, final int numberOfLastLines, final Callback<String> callback) {
 
 		final TailerListener listener = new TailerListenerAdapter() {
 			@Override
@@ -38,9 +41,14 @@ public class TailServiceImpl implements TailService {
 		};
 
 		Tailer tailer = new Tailer(file, listener, DELAY, true);
-		final ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(tailer, DELAY);
+		taskExecutor.execute(tailer);
 
-		return new TailTaskReference(scheduledFuture);
+		return new TailTaskReference(tailer);
+	}
+
+	@Override
+	public Tail startTail(final File file, final Callback<String> callback) {
+		return startTail(file, 0, callback);
 	}
 
 	@Override

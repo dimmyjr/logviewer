@@ -25,4 +25,9 @@ public class TailFileProperty extends AbstractProperty<String> {
 	public Class<? extends String> getType() {
 		return String.class;
 	}
+
+	public void clear() {
+		buffer.setLength(0);
+		fireValueChange();
+	}
 }

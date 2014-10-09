@@ -24,9 +24,11 @@ public class CreateFileTest {
 			FileUtils.deleteQuietly(file2);
 			int i = 0;
 			while (true) {
-				Files.append(i++ + " - " + new Date() + "\n", file, Charset.defaultCharset());
+				Files.append(i + " - " + new Date() + " - " + FileConstants.FILENAME + "\n", file,
+						Charset.defaultCharset());
 				Thread.sleep(300);
-				Files.append(i++ + " - " + new Date() + "\n", file2, Charset.defaultCharset());
+				Files.append(i++ + " - " + new Date() + " - " + FileConstants.FILENAME_2 + "\n", file2,
+						Charset.defaultCharset());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
