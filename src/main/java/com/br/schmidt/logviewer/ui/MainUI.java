@@ -17,11 +17,13 @@ import com.vaadin.annotations.Title;
 import com.vaadin.data.Property;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * @author Diego Schmidt
@@ -32,11 +34,15 @@ import com.vaadin.ui.UI;
 @Title("LogViewer")
 public class MainUI extends UI {
 
+	public static final int SCROLL_TOP = 1000000;
+	private Button.ClickListener clickListener;
 	private CustomFilesystemContainer container;
+	private Button startStopButton;
 	private Tail tail;
 
 	@Autowired
 	private I18N i18n;
+	private TailFileProperty tailFileProperty;
 
 	@Autowired
 	private TailService tailService;
@@ -49,14 +55,14 @@ public class MainUI extends UI {
 		HorizontalLayout layout = new HorizontalLayout() {
 			{
 				final Label fileView = new Label("", ContentMode.PREFORMATTED);
-				final Panel contentPanel = new Panel(i18n.get("label.content")) {
+				final Panel contentPanel = new Panel() {
 					{
 						setContent(fileView);
 						setSizeFull();
 					}
 				};
 
-				final Panel filesPanel = new Panel(i18n.get("label.files")) {
+				final Panel filesPanel = new Panel() {
 					{
 						final Table fileList = new Table(i18n.get("label.logs"), container) {
 							{
@@ -78,8 +84,40 @@ public class MainUI extends UI {
 				};
 
 				addComponent(filesPanel);
-				addComponent(contentPanel);
-				setExpandRatio(contentPanel, 1.0f);
+				final VerticalLayout contentLayout = new VerticalLayout() {
+					{
+						addComponent(new Panel() {
+							{
+								addComponent(new HorizontalLayout() {
+									{
+										setSpacing(true);
+										startStopButton = new Button("") {
+											{
+												setVisible(false);
+											}
+										};
+										addComponent(startStopButton);
+										addComponent(new Button(i18n.get("label.button.clear")) {
+											{
+												addClickListener(new ClickListener() {
+													@Override
+													public void buttonClick(final ClickEvent event) {
+														tailFileProperty.clear();
+													}
+												});
+											}
+										});
+									}
+								});
+							}
+						});
+						addComponent(contentPanel);
+						setExpandRatio(contentPanel, 1.0f);
+						setSizeFull();
+					}
+				};
+				addComponent(contentLayout);
+				setExpandRatio(contentLayout, 1.0f);
 				setSizeFull();
 			}
 		};
@@ -94,11 +132,39 @@ public class MainUI extends UI {
 	}
 
 	private void tail(final File file, final Label fileView, final Panel finalContentPanel, final Table fileList) {
-		final TailFileProperty tailFileProperty = new TailFileProperty();
+		tailFileProperty = new TailFileProperty();
 		fileView.setPropertyDataSource(tailFileProperty);
 
 		tailService.stopTail(tail);
 
+		startStopButton.setVisible(true);
+		startStopButton.setCaption(i18n.get("label.button.stop"));
+
+		if (clickListener != null) {
+			startStopButton.removeClickListener(clickListener);
+		}
+		clickListener = new Button.ClickListener() {
+			@Override
+			public void buttonClick(final Button.ClickEvent event) {
+				startStopTail(file, tailFileProperty, finalContentPanel, fileList);
+			}
+		};
+		startStopButton.addClickListener(clickListener);
+		startStopTail(file, tailFileProperty, finalContentPanel, fileList);
+	}
+
+	private void startStopTail(final File file, final TailFileProperty tailFileProperty, final Panel finalContentPanel,
+			final Table fileList) {
+		if (tail != null && tail.isStarted()) {
+			stopTail();
+		} else {
+			startTail(file, tailFileProperty, finalContentPanel, fileList);
+		}
+	}
+
+	private void startTail(final File file, final TailFileProperty tailFileProperty, final Panel finalContentPanel,
+			final Table fileList) {
+		startStopButton.setCaption(i18n.get("label.button.stop"));
 		tail = tailService.startTail(file, new Callback<String>() {
 			@Override
 			public void execute(final String line) {
@@ -106,14 +172,17 @@ public class MainUI extends UI {
 					@Override
 					public void run() {
 						tailFileProperty.setValue(line + "\n");
-						finalContentPanel.setScrollTop(1000000);
+						finalContentPanel.setScrollTop(SCROLL_TOP);
 						finalContentPanel.markAsDirty();
 						fileList.refreshRowCache();
 					}
 				});
 			}
 		});
-
 	}
 
+	private void stopTail() {
+		tailService.stopTail(tail);
+		startStopButton.setCaption(i18n.get("label.button.start"));
+	}
 }

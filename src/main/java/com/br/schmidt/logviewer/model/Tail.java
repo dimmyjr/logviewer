@@ -6,6 +6,8 @@ package com.br.schmidt.logviewer.model;
  */
 public interface Tail {
 
+	boolean isStarted();
+
 	boolean stop();
 
 }

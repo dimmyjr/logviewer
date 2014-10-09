@@ -1,6 +1,6 @@
 package com.br.schmidt.logviewer.model;
 
-import java.util.concurrent.ScheduledFuture;
+import org.apache.commons.io.input.Tailer;
 
 /**
  * @author Diego Schmidt
@@ -8,21 +8,27 @@ import java.util.concurrent.ScheduledFuture;
  */
 public class TailTaskReference implements Tail {
 
-	private ScheduledFuture<?> task;
+	private final Tailer tailer;
+	private boolean started;
 
-	public TailTaskReference(final ScheduledFuture<?> task) {
-		this.task = task;
+	public TailTaskReference(final Tailer tailer) {
+		this.tailer = tailer;
+		this.started = true;
 	}
 
-	public ScheduledFuture<?> getTask() {
-		return task;
+	@Override
+	public boolean isStarted() {
+		return started;
 	}
 
 	@Override
 	public boolean stop() {
-		if (task != null) {
-			return task.cancel(true);
+		if (tailer != null) {
+			tailer.stop();
+			started = false;
+			return true;
 		}
+		started = false;
 		return false;
 	}
 }
