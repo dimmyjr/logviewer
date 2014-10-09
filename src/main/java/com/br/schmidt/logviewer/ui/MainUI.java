@@ -36,7 +36,7 @@ import com.vaadin.ui.VerticalLayout;
 public class MainUI extends UI {
 
 	public static final int SCROLL_TOP = 1000000;
-	public static final int NUMBER_OF_LAST_LINES = 300;
+	public static final int NUMBER_OF_LAST_LINES = 10;
 	private boolean autoScroll;
 	private CheckBox autoScrollCheckbox;
 	private Button.ClickListener clickListener;
@@ -176,7 +176,7 @@ public class MainUI extends UI {
 			}
 		};
 		startStopButton.addClickListener(clickListener);
-		startStopTail(file, tailFileProperty, finalContentPanel, fileList);
+		startTail(file, tailFileProperty, finalContentPanel, fileList);
 	}
 
 	private void startStopTail(final File file, final TailFileProperty tailFileProperty, final Panel finalContentPanel,
@@ -184,8 +184,13 @@ public class MainUI extends UI {
 		if (tail != null && tail.isStarted()) {
 			stopTail();
 		} else {
-			startTail(file, tailFileProperty, finalContentPanel, fileList);
+			startTail();
 		}
+	}
+
+	private void startTail() {
+		startStopButton.setCaption(i18n.get("label.button.stop"));
+		tailService.startTail(tail);
 	}
 
 	private void startTail(final File file, final TailFileProperty tailFileProperty, final Panel contentPanel,

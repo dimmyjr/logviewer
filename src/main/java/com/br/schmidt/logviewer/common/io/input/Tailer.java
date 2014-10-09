@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+
+import com.google.common.collect.Lists;
 
 /**
  * Simple implementation of the unix "tail -f" functionality.
@@ -90,42 +93,36 @@ import org.apache.commons.io.IOUtils;
  */
 public class Tailer implements Runnable {
 
-	private static final int DEFAULT_DELAY_MILLIS = 1000;
-
-	private static final String RAF_MODE = "r";
-
 	private static final int DEFAULT_BUFSIZE = 4096;
-
-	/**
-	 * Buffer on top of RandomAccessFile.
-	 */
-	private final byte inbuf[];
-
-	/**
-	 * The file which will be tailed.
-	 */
-	private final File file;
-
+	private static final int DEFAULT_DELAY_MILLIS = 1000;
+	private static final int DEFAULT_NUMBER_OF_LAST_LINES = 0;
+	private static final String RAF_MODE = "r";
 	/**
 	 * The amount of time to wait for the file to be updated.
 	 */
 	private final long delayMillis;
-
 	/**
 	 * Whether to tail from the end or start of file
 	 */
 	private final boolean end;
-
+	/**
+	 * The file which will be tailed.
+	 */
+	private final File file;
+	/**
+	 * Buffer on top of RandomAccessFile.
+	 */
+	private final byte inbuf[];
 	/**
 	 * The listener to notify of events when tailing.
 	 */
 	private final TailerListener listener;
-
+	private final int numberOfLastLines;
 	/**
 	 * Whether to close and reopen the file whilst waiting for more input.
 	 */
 	private final boolean reOpen;
-
+	private long position = 0;
 	/**
 	 * The tailer will run as long as this value is true.
 	 */
@@ -161,7 +158,7 @@ public class Tailer implements Runnable {
 	 * @param end         Set to true to tail from the end of the file, false to tail from the beginning of the file.
 	 */
 	public Tailer(File file, TailerListener listener, long delayMillis, boolean end) {
-		this(file, listener, delayMillis, end, DEFAULT_BUFSIZE);
+		this(file, listener, delayMillis, end, DEFAULT_NUMBER_OF_LAST_LINES);
 	}
 
 	/**
@@ -174,38 +171,42 @@ public class Tailer implements Runnable {
 	 * @param reOpen      if true, close and reopen the file between reading chunks
 	 */
 	public Tailer(File file, TailerListener listener, long delayMillis, boolean end, boolean reOpen) {
-		this(file, listener, delayMillis, end, reOpen, DEFAULT_BUFSIZE);
+		this(file, listener, delayMillis, end, reOpen, DEFAULT_NUMBER_OF_LAST_LINES);
 	}
 
 	/**
-	 * Creates a Tailer for the given file, with a specified buffer size.
+	 * Creates a Tailer for the given file.
 	 *
-	 * @param file        the file to follow.
-	 * @param listener    the TailerListener to use.
-	 * @param delayMillis the delay between checks of the file for new content in milliseconds.
-	 * @param end         Set to true to tail from the end of the file, false to tail from the beginning of the file.
-	 * @param bufSize     Buffer size
+	 * @param file              the file to follow.
+	 * @param listener          the TailerListener to use.
+	 * @param delayMillis       the delay between checks of the file for new content in milliseconds.
+	 * @param end               Set to true to tail from the end of the file, false to tail from the beginning of the
+	 *                             file.
+	 * @param numberOfLastLines Number of previous lines to read.
 	 */
-	public Tailer(File file, TailerListener listener, long delayMillis, boolean end, int bufSize) {
-		this(file, listener, delayMillis, end, false, bufSize);
+	public Tailer(File file, TailerListener listener, long delayMillis, boolean end, int numberOfLastLines) {
+		this(file, listener, delayMillis, end, false, numberOfLastLines);
 	}
 
 	/**
-	 * Creates a Tailer for the given file, with a specified buffer size.
+	 * Creates a Tailer for the given file.
 	 *
-	 * @param file        the file to follow.
-	 * @param listener    the TailerListener to use.
-	 * @param delayMillis the delay between checks of the file for new content in milliseconds.
-	 * @param end         Set to true to tail from the end of the file, false to tail from the beginning of the file.
-	 * @param reOpen      if true, close and reopen the file between reading chunks
-	 * @param bufSize     Buffer size
+	 * @param file              the file to follow.
+	 * @param listener          the TailerListener to use.
+	 * @param delayMillis       the delay between checks of the file for new content in milliseconds.
+	 * @param end               Set to true to tail from the end of the file, false to tail from the beginning of the
+	 *                             file.
+	 * @param reOpen            if true, close and reopen the file between reading chunks
+	 * @param numberOfLastLines Number of previous lines to read.
 	 */
-	public Tailer(File file, TailerListener listener, long delayMillis, boolean end, boolean reOpen, int bufSize) {
+	public Tailer(File file, TailerListener listener, long delayMillis, boolean end, boolean reOpen,
+			int numberOfLastLines) {
 		this.file = file;
 		this.delayMillis = delayMillis;
 		this.end = end;
+		this.numberOfLastLines = numberOfLastLines;
 
-		this.inbuf = new byte[bufSize];
+		this.inbuf = new byte[DEFAULT_BUFSIZE];
 
 		// Save and prepare the listener
 		this.listener = listener;
@@ -303,15 +304,6 @@ public class Tailer implements Runnable {
 	}
 
 	/**
-	 * Return the file.
-	 *
-	 * @return the file
-	 */
-	public File getFile() {
-		return file;
-	}
-
-	/**
 	 * Return the delay in milliseconds.
 	 *
 	 * @return the delay in milliseconds.
@@ -321,13 +313,31 @@ public class Tailer implements Runnable {
 	}
 
 	/**
+	 * Return the file.
+	 *
+	 * @return the file
+	 */
+	public File getFile() {
+		return file;
+	}
+
+	/**
+	 * Gets position.
+	 *
+	 * @return the position
+	 */
+	public long getPosition() {
+		return position;
+	}
+
+	/**
 	 * Follows changes in the file, calling the TailerListener's handle method for each new line.
 	 */
 	public void run() {
 		RandomAccessFile reader = null;
 		try {
 			long last = 0; // The last time the file was checked for changes
-			long position = 0; // position within the file
+			run = true;
 			// Open the file
 			while (run && reader == null) {
 				try {
@@ -343,7 +353,23 @@ public class Tailer implements Runnable {
 					}
 				} else {
 					// The current position in the file
-					position = end ? file.length() : 0;
+					if (position <= 0) {
+						position = end ? file.length() : 0;
+
+						if (end && numberOfLastLines > 0) {
+							ReversedLinesFileReader fileReader = new ReversedLinesFileReader(reader);
+							int i = 0;
+							final List<String> previousLines = Lists.newArrayList();
+							String lineRead = "";
+							while (i++ < numberOfLastLines && (lineRead = fileReader.readLine()) != null) {
+								previousLines.add(lineRead);
+							}
+							for (String line : Lists.reverse(previousLines)) {
+								listener.handle(line);
+							}
+						}
+					}
+
 					last = System.currentTimeMillis();
 					reader.seek(position);
 				}

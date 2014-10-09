@@ -11,6 +11,8 @@ import com.br.schmidt.logviewer.model.Tail;
  */
 public interface TailService {
 
+	Tail startTail(final Tail tail);
+
 	Tail startTail(final File file, final Callback<String> callback);
 
 	Tail startTail(final File file, final int numberOfLastLines, final Callback<String> callback);

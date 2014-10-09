@@ -16,9 +16,17 @@ public class TailTaskReference implements Tail {
 		this.started = true;
 	}
 
+	public Tailer getTailer() {
+		return tailer;
+	}
+
 	@Override
 	public boolean isStarted() {
 		return started;
+	}
+
+	public void setStarted(final boolean started) {
+		this.started = started;
 	}
 
 	@Override

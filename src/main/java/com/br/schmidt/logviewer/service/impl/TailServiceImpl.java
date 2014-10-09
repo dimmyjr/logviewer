@@ -40,10 +40,20 @@ public class TailServiceImpl implements TailService {
 			}
 		};
 
-		Tailer tailer = new Tailer(file, listener, DELAY, true);
+		Tailer tailer = new Tailer(file, listener, DELAY, true, numberOfLastLines);
 		taskExecutor.execute(tailer);
 
 		return new TailTaskReference(tailer);
+	}
+
+	@Override
+	public Tail startTail(final Tail tail) {
+		if (tail instanceof TailTaskReference) {
+			final TailTaskReference tailTaskReference = (TailTaskReference) tail;
+			taskExecutor.execute(tailTaskReference.getTailer());
+			tailTaskReference.setStarted(true);
+		}
+		return tail;
 	}
 
 	@Override
