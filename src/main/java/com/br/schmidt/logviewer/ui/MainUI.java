@@ -18,6 +18,7 @@ import com.vaadin.data.Property;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -35,6 +36,9 @@ import com.vaadin.ui.VerticalLayout;
 public class MainUI extends UI {
 
 	public static final int SCROLL_TOP = 1000000;
+	public static final int NUMBER_OF_LAST_LINES = 300;
+	private boolean autoScroll;
+	private CheckBox autoScrollCheckbox;
 	private Button.ClickListener clickListener;
 	private CustomFilesystemContainer container;
 	private Button startStopButton;
@@ -102,11 +106,22 @@ public class MainUI extends UI {
 												addClickListener(new ClickListener() {
 													@Override
 													public void buttonClick(final ClickEvent event) {
-														tailFileProperty.clear();
+														clear();
 													}
 												});
 											}
 										});
+										autoScrollCheckbox = new CheckBox(i18n.get("label.auto_scroll"), true) {
+											{
+												addValueChangeListener(new ValueChangeListener() {
+													@Override
+													public void valueChange(final Property.ValueChangeEvent event) {
+														autoScroll((Boolean) event.getProperty().getValue());
+													}
+												});
+											}
+										};
+										addComponent(autoScrollCheckbox);
 									}
 								});
 							}
@@ -125,6 +140,14 @@ public class MainUI extends UI {
 		setContent(layout);
 	}
 
+	private void autoScroll(final boolean value) {
+		autoScroll = value;
+	}
+
+	private void clear() {
+		tailFileProperty.clear();
+	}
+
 	@Override
 	public void detach() {
 		tailService.stopTail(tail);
@@ -132,6 +155,9 @@ public class MainUI extends UI {
 	}
 
 	private void tail(final File file, final Label fileView, final Panel finalContentPanel, final Table fileList) {
+		autoScroll(true);
+		autoScrollCheckbox.setValue(true);
+
 		tailFileProperty = new TailFileProperty();
 		fileView.setPropertyDataSource(tailFileProperty);
 
@@ -162,18 +188,19 @@ public class MainUI extends UI {
 		}
 	}
 
-	private void startTail(final File file, final TailFileProperty tailFileProperty, final Panel finalContentPanel,
+	private void startTail(final File file, final TailFileProperty tailFileProperty, final Panel contentPanel,
 			final Table fileList) {
 		startStopButton.setCaption(i18n.get("label.button.stop"));
-		tail = tailService.startTail(file, new Callback<String>() {
+		tail = tailService.startTail(file, NUMBER_OF_LAST_LINES, new Callback<String>() {
 			@Override
 			public void execute(final String line) {
 				access(new Runnable() {
 					@Override
 					public void run() {
 						tailFileProperty.setValue(line + "\n");
-						finalContentPanel.setScrollTop(SCROLL_TOP);
-						finalContentPanel.markAsDirty();
+						if (autoScroll) {
+							contentPanel.setScrollTop(SCROLL_TOP);
+						}
 						fileList.refreshRowCache();
 					}
 				});
