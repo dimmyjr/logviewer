@@ -13,6 +13,8 @@ public interface TailService {
 
 	Tail startTail(final File file, final Callback<String> callback);
 
+	Tail startTail(final File file, final int numberOfLastLines, final Callback<String> callback);
+
 	boolean stopTail(Tail tail);
 
 }
