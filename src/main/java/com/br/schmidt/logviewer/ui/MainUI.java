@@ -35,17 +35,16 @@ import com.vaadin.ui.VerticalLayout;
 @Title("LogViewer")
 public class MainUI extends UI {
 
-	public static final int SCROLL_TOP = 1000000;
 	public static final int NUMBER_OF_LAST_LINES = 10;
+	public static final int SCROLL_TOP = 1000000;
 	private boolean autoScroll;
 	private CheckBox autoScrollCheckbox;
 	private Button.ClickListener clickListener;
 	private CustomFilesystemContainer container;
-	private Button startStopButton;
-	private Tail tail;
-
 	@Autowired
 	private I18N i18n;
+	private Button startStopButton;
+	private Tail tail;
 	private TailFileProperty tailFileProperty;
 
 	@Autowired
@@ -59,6 +58,7 @@ public class MainUI extends UI {
 		HorizontalLayout layout = new HorizontalLayout() {
 			{
 				final Label fileView = new Label("", ContentMode.PREFORMATTED);
+
 				final Panel contentPanel = new Panel() {
 					{
 						setContent(fileView);
@@ -140,6 +140,12 @@ public class MainUI extends UI {
 		setContent(layout);
 	}
 
+	@Override
+	public void detach() {
+		tailService.stopTail(tail);
+		super.detach();
+	}
+
 	private void autoScroll(final boolean value) {
 		autoScroll = value;
 	}
@@ -148,38 +154,7 @@ public class MainUI extends UI {
 		tailFileProperty.clear();
 	}
 
-	@Override
-	public void detach() {
-		tailService.stopTail(tail);
-		super.detach();
-	}
-
-	private void tail(final File file, final Label fileView, final Panel finalContentPanel, final Table fileList) {
-		autoScroll(true);
-		autoScrollCheckbox.setValue(true);
-
-		tailFileProperty = new TailFileProperty();
-		fileView.setPropertyDataSource(tailFileProperty);
-
-		tailService.stopTail(tail);
-
-		startStopButton.setVisible(true);
-		startStopButton.setCaption(i18n.get("label.button.stop"));
-
-		if (clickListener != null) {
-			startStopButton.removeClickListener(clickListener);
-		}
-		clickListener = new Button.ClickListener() {
-			@Override
-			public void buttonClick(final Button.ClickEvent event) {
-				startStopTail(file, tailFileProperty, finalContentPanel, fileList);
-			}
-		};
-		startStopButton.addClickListener(clickListener);
-		startTail(file, tailFileProperty, finalContentPanel, fileList);
-	}
-
-	private void startStopTail(final File file, final TailFileProperty tailFileProperty, final Panel finalContentPanel,
+	private void startStopTail(final TailFileProperty tailFileProperty, final Panel finalContentPanel,
 			final Table fileList) {
 		if (tail != null && tail.isStarted()) {
 			stopTail();
@@ -216,5 +191,30 @@ public class MainUI extends UI {
 	private void stopTail() {
 		tailService.stopTail(tail);
 		startStopButton.setCaption(i18n.get("label.button.start"));
+	}
+
+	private void tail(final File file, final Label fileView, final Panel finalContentPanel, final Table fileList) {
+		autoScroll(true);
+		autoScrollCheckbox.setValue(true);
+
+		tailFileProperty = new TailFileProperty();
+		fileView.setPropertyDataSource(tailFileProperty);
+
+		tailService.stopTail(tail);
+
+		startStopButton.setVisible(true);
+		startStopButton.setCaption(i18n.get("label.button.stop"));
+
+		if (clickListener != null) {
+			startStopButton.removeClickListener(clickListener);
+		}
+		clickListener = new Button.ClickListener() {
+			@Override
+			public void buttonClick(final Button.ClickEvent event) {
+				startStopTail(tailFileProperty, finalContentPanel, fileList);
+			}
+		};
+		startStopButton.addClickListener(clickListener);
+		startTail(file, tailFileProperty, finalContentPanel, fileList);
 	}
 }
