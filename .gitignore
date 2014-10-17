@@ -40,3 +40,4 @@ build/
 target/
 
 *.log
+src/main/public
