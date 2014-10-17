@@ -2,7 +2,9 @@ package com.br.schmidt.logviewer.ui.component.client;
 
 import com.br.schmidt.logviewer.ui.component.Display;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.shared.ui.Connect;
@@ -33,5 +35,11 @@ public class DisplayConnector extends AbstractComponentConnector {
 	@Override
 	public DisplayState getState() {
 		return (DisplayState) super.getState();
+	}
+
+	@OnStateChange("text")
+	void updateText() {
+		getWidget().add(new Label(getState().text));
+		;
 	}
 }

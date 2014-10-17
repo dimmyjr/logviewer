@@ -22,4 +22,12 @@ public class Display extends AbstractComponent {
 	protected DisplayState getState() {
 		return (DisplayState) super.getState();
 	}
+
+	public void setText(String text) {
+		getState().text = text;
+	}
+
+	public String getText() {
+		return getState().text;
+	}
 }

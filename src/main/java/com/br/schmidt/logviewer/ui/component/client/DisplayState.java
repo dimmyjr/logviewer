@@ -8,4 +8,6 @@ import com.vaadin.shared.AbstractComponentState;
  */
 public class DisplayState extends AbstractComponentState {
 
+	public String text;
+
 }
