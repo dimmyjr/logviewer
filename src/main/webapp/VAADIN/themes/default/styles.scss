@@ -1,0 +1,7 @@
+// Import all the mixins for this theme
+@import "default.scss";
+
+.default {
+  // Output the actual theme selectors
+  @include default;
+}

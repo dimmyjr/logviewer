@@ -6,7 +6,7 @@ package com.br.schmidt.logviewer;
  */
 public interface FileConstants {
 
-	String FILENAME = "tailer.log";
-	String FILENAME_2 = "tailer2.log";
+	String FILENAME = "C:\\DevTools-v6_x64\\var\\was7_profile\\dev\\logs\\dev\\tailer.log";
+	String FILENAME_2 = "C:\\DevTools-v6_x64\\var\\was7_profile\\dev\\logs\\dev\\tailer2.log";
 
 }
