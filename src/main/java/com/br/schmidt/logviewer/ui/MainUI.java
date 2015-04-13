@@ -10,7 +10,7 @@ import com.vaadin.annotations.Title;
 import com.vaadin.data.Property;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.*;
 import org.vaadin.spring.VaadinUI;
 import org.vaadin.spring.i18n.I18N;
 
@@ -32,6 +32,9 @@ public class MainUI extends UI {
     private I18N i18n;
     @Autowired
     private TailService tailService;
+	
+	@Value("${logviewer.path}")
+	private String path;
 
     private TabSheet contentPanel;
     private CustomFilesystemContainer container;
@@ -47,8 +50,9 @@ public class MainUI extends UI {
 
     private void buildLayout() {
         //TODO Get file path from???
-        container = new CustomFilesystemContainer(new File("C:\\DevTools-v6_x64\\var\\was7_profile\\dev\\logs\\dev"), new LogFilter(), true);
-//        container = new CustomFilesystemContainer(new File("."), new LogFilter(), true);
+        //container = new CustomFilesystemContainer(new File("C:\\DevTools-v6_x64\\var\\was7_profile\\dev\\logs\\dev"), new LogFilter(), true);
+		System.out.println("################## " + path);
+        container = new CustomFilesystemContainer(new File(path), new LogFilter(), true);
         contentPanel = new TabSheet();
         contentPanel.addStyleName("framed padded-tabbar");
         contentPanel.setSizeFull();
@@ -98,15 +102,15 @@ public class MainUI extends UI {
         if (!files.containsKey(file)) {
             TabFile tabFile = new TabFile(tailService, i18n, file);
             this.files.put(file, tabFile);
-            TabSheet.Tab tab = contentPanel.addTab(tabFile, file.getName() + " " + file.length());
+            TabSheet.Tab tab = contentPanel.addTab(tabFile, tabFile.getFileName());
             tab.setClosable(true);
-
             contentPanel.setSelectedTab(tabFile);
         } else {
             contentPanel.setSelectedTab(this.files.get(file));
         }
 
     }
+
 
     class InitializerThread extends Thread {
         @Override
@@ -122,7 +126,15 @@ public class MainUI extends UI {
                                 if (contentPanel.getTab(entry.getValue()) == null){
                                     continue;
                                 }
-                                contentPanel.getTab(entry.getValue()).setCaption(entry.getKey().getName() + " " + entry.getKey().length());
+
+                                if (contentPanel.getTab(entry.getValue()).getComponent() != contentPanel.getSelectedTab()
+                                        && entry.getValue().isFileChange()){
+                                    contentPanel.getTab(entry.getValue()).setCaption(entry.getValue().getFileName() + " *");
+                                } else{
+                                    contentPanel.getTab(entry.getValue()).setCaption(entry.getValue().getFileName());
+                                    entry.getValue().setFileChange(false);
+                                }
+
                             }
 
                             fileList.refreshRowCache();

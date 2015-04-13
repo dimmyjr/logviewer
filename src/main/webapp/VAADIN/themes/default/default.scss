@@ -16,6 +16,17 @@ $v-error-indicator-color: hsl(349, 66%, 56%);
 @mixin default {
   @include valo;
 
+  .logcontent {
+    padding: 5px;
+    width: auto !important;
+    white-space: nowrap;
+    font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;
+    font-size: 14px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 400;
+    line-height: 20px;
+  }
 
   #themeSelect {
     position: fixed;

@@ -27,6 +27,7 @@ public class TabFile extends VerticalLayout {
     private Tail tail;
     private Label fileContent;
     private CheckBox chkAutoScroll;
+    private boolean fileChange;
 
 
 
@@ -38,6 +39,7 @@ public class TabFile extends VerticalLayout {
         this.fileId = UUID.randomUUID().toString();
         this.fileContent = new Label("", ContentMode.PREFORMATTED);
         this.fileContent.setId(this.fileId);
+        this.fileContent.setStyleName("logcontent");
 
         this.chkAutoScroll = new CheckBox(i18n.get("label.auto_scroll"));
 
@@ -65,6 +67,17 @@ public class TabFile extends VerticalLayout {
         startTail(file);
     }
 
+    public String getFileName(){
+        return file.getName();
+    }
+
+    public boolean isFileChange() {
+        return fileChange;
+    }
+
+    public void setFileChange(boolean fileChange) {
+        this.fileChange = fileChange;
+    }
 
     private void startTail(final File file) {
         tail = tailService.startTail(file, NUMBER_OF_LAST_LINES, new Callback<String>() {
@@ -74,7 +87,7 @@ public class TabFile extends VerticalLayout {
                     @Override
                     public void run() {
                         JavaScript.getCurrent().execute(String.format(JS_ADD, fileId, line));
-
+                        fileChange = true;
                         if (chkAutoScroll.getValue()) {
                             getUI().scrollIntoView(fileContent);
                         }
