@@ -21,7 +21,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<start-class>com.br.schmidt.logviewer.Application</start-class>
+		<start-class>com.logviewer.Application</start-class>
 		<commons-io.version>2.4</commons-io.version>
 		<guava.version>18.0</guava.version>
 		<gwt.version>2.6.1</gwt.version>
