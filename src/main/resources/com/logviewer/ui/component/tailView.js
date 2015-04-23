@@ -32,7 +32,9 @@ com_logviewer_ui_component_TailView = function() {
 	this.scroll = function(){
 		 if (scroll == true) {
 			window.setInterval(function() {
-			  e.parentNode.scrollTop = e.parentNode.scrollHeight;
+				if (scroll == true) {
+			  		e.parentNode.scrollTop = e.parentNode.scrollHeight;
+			  	}
 			}, 5000);
 		}
 	}

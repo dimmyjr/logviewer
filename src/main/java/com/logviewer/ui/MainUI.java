@@ -1,5 +1,6 @@
 package com.logviewer.ui;
 
+import com.logviewer.Configuration;
 import com.logviewer.service.TailService;
 import com.logviewer.ui.component.OpenFile;
 import com.logviewer.ui.component.TabFile;
@@ -18,6 +19,7 @@ import org.vaadin.spring.VaadinUI;
 import org.vaadin.spring.i18n.I18N;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -25,7 +27,7 @@ import java.util.*;
  * @since 03/10/2014
  */
 @VaadinUI
-@Push(value = PushMode.MANUAL, transport = Transport.WEBSOCKET)
+@Push(value = PushMode.MANUAL, transport = Transport.LONG_POLLING)
 @Title("Sharingan")
 @Theme("default")
 public class MainUI extends UI {
@@ -34,7 +36,10 @@ public class MainUI extends UI {
     private I18N i18n;
     @Autowired
     private TailService tailService;
-
+    @Autowired
+    private OpenFile openFile;
+    @Autowired
+    private Configuration configuration;
     @Value("${logviewer.path}")
     private String path;
 
@@ -42,16 +47,16 @@ public class MainUI extends UI {
     private static final ThemeResource ICON_YELLOW = new ThemeResource("img/circle-yellow_.png");
 
     private TabSheet contentPanel;
-
     private Map<File, TabFile> files;
 
     @Override
     protected void init(final VaadinRequest request) {
         Page.getCurrent().setTitle("Sharingan - Root: " + path);
-        this.files = new HashMap<>();
+        this.files = new HashMap<File, TabFile>();
         buildLayout();
         new InitializerThread().start();
     }
+
 
     private void buildLayout() {
         contentPanel = new TabSheet();
@@ -64,10 +69,8 @@ public class MainUI extends UI {
                 if (tabSheet.getComponentCount() > 1) {
                     ((TabFile) tabSheet.getSelectedTab()).loadFullFile();
                 }
-
             }
         });
-
 
         HorizontalLayout layout = new HorizontalLayout() {
             {
@@ -76,19 +79,21 @@ public class MainUI extends UI {
                         addComponent(new MenuBar() {
                             {
                                 setWidth(100, Unit.PERCENTAGE);
-                                addItem("Load", new Command() {
+                                addItem(i18n.get("label.button.addfile"), new Command() {
                                     @Override
                                     public void menuSelected(MenuItem menuItem) {
-                                        new OpenFile().showDialog(getUI(), path, new Property.ValueChangeListener() {
+                                        openFile.showDialog(getUI(), path, new Property.ValueChangeListener() {
                                             @Override
                                             public void valueChange(Property.ValueChangeEvent event) {
                                                 final File file = (File) event.getProperty().getValue();
                                                 tail(file);
-
                                             }
                                         });
                                     }
                                 });
+
+                                MenuItem recents =  addItem(i18n.get("label.button.addfilerecent"), null);
+                                recents.addItem("...", null);
                             }
                         });
 

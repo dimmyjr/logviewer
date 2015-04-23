@@ -3,13 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.br.schmidt</groupId>
-	<artifactId>logviewer</artifactId>
+	<groupId>com.logviewer</groupId>
+	<artifactId>sharinganr</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>logviewer</name>
-	<description>Logviewer project</description>
+	<name>Sharingan</name>
+	<description>Sharingan Log Viewer</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -25,13 +25,14 @@
 		<commons-io.version>2.4</commons-io.version>
 		<guava.version>18.0</guava.version>
 		<gwt.version>2.6.1</gwt.version>
-		<java.version>1.7</java.version>
+		<java.version>1.6</java.version>
 		<javax.inject.version>1</javax.inject.version>
 		<spring4vaadin.version>0.0.3-SNAPSHOT</spring4vaadin.version>
 		<springboot.version>${project.parent.version}</springboot.version>
 		<springloaded.version>1.2.0.RELEASE</springloaded.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<vaadin.version>7.3.2</vaadin.version>
+		<tomcat.version>7.0.59</tomcat.version>
 	</properties>
 
 	<dependencies>

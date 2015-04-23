@@ -61,6 +61,7 @@ public class TabFile extends VerticalLayout {
                     @Override
                     public void menuSelected(MenuItem menuItem) {
                         autoScroll = menuItem.isChecked();
+                        fileContent.setScroll(autoScroll);
                     }
                 });
                 chkAutoScroll.setCheckable(true);
