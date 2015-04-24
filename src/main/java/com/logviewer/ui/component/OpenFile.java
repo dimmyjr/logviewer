@@ -1,8 +1,10 @@
 package com.logviewer.ui.component;
 
+import com.logviewer.Configuration;
 import com.logviewer.common.io.filter.LogFilter;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.FilesystemContainer;
+import com.vaadin.event.FieldEvents;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Component;
@@ -19,15 +21,16 @@ import java.io.File;
 public class OpenFile {
     private Window dialog;
     private FilesystemContainer container;
-    private String path;
     private Property.ValueChangeListener changeListener;
     private File file;
     @Autowired
     private I18N i18n;
+    @Autowired
+    private Configuration configuration;
 
 
-    public void showDialog(UI currentUI, String path, Property.ValueChangeListener changeListener) {
-        this.path = path;
+
+    public void showDialog(UI currentUI, Property.ValueChangeListener changeListener) {
         this.changeListener = changeListener;
 
         this.dialog = new Window(i18n.get("label.load.title"), buildContetDialog());
@@ -43,15 +46,12 @@ public class OpenFile {
 
 
     private Component buildContetDialog() {
-        this.container = new FilesystemContainer(new File(this.path), new LogFilter(), true);
-		TreeTable table = new TreeTable("", container) {
+		final TreeTable table = new TreeTable("") {
             {
                 addStyleName("small compact");
                 setSizeFull();
                 setImmediate(true);
                 setSelectable(true);
-                setItemIconPropertyId("Icon");
-                setVisibleColumns(new Object[]{"Name", "Size"});
                 addValueChangeListener(new ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
@@ -61,11 +61,27 @@ public class OpenFile {
             }
         };
 
+        ComboBox comboRoots = new ComboBox(i18n.get("label.load.root"), configuration.getRoots());
+        comboRoots.setWidth(100, Sizeable.Unit.PERCENTAGE);
+        comboRoots.setInputPrompt(i18n.get("label.load.rootinput"));
+        comboRoots.setNullSelectionAllowed(false);
+        comboRoots.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                final File root = new File(event.getProperty().getValue().toString());
+                table.setContainerDataSource(new FilesystemContainer(root, new LogFilter(), true));
+                table.setItemIconPropertyId("Icon");
+                table.setVisibleColumns(new Object[]{"Name", "Size"});
+                table.refreshRowCache();
+            }
+        });
+
         VerticalLayout panelContent = new VerticalLayout();
         panelContent.setSpacing(true);
 		panelContent.setMargin(true);
 		panelContent.setSizeFull();
         panelContent.setId("panel-content");
+        panelContent.addComponent(comboRoots);
         panelContent.addComponent(table);
 		panelContent.setExpandRatio(table, 1.0f);
         panelContent.addComponent(new HorizontalLayout() {

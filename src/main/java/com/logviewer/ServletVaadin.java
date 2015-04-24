@@ -23,31 +23,4 @@ import javax.servlet.annotation.WebServlet;
 @VaadinServletConfiguration(productionMode = false, ui = MainUI.class)
 public class ServletVaadin extends VaadinServlet {
 
-
-    @Override
-    protected void servletInitialized() throws ServletException {
-        super.servletInitialized();
-        getService().addSessionInitListener(new SessionInitListener() {
-            @Override
-            public void sessionInit(SessionInitEvent event) throws ServiceException {
-                event.getSession().addBootstrapListener(new BootstrapListener() {
-                    @Override
-                    public void modifyBootstrapPage(BootstrapPageResponse response) {
-                        System.out.println("$$$$$$$$$$$$$ start");
-                        response.getDocument().head().prependElement("script").attr("type", "text/javascript").attr(
-                                "src",
-                                "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js");
-                        response.getDocument().head().prependElement("script").attr("type", "text/javascript").attr(
-                                "src",
-                                "js/tail.js");
-                    }
-
-                    @Override
-                    public void modifyBootstrapFragment(BootstrapFragmentResponse response) {
-                    }
-                });
-            }
-        });
-    }
-
 }

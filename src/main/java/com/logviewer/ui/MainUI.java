@@ -8,18 +8,16 @@ import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.data.Property;
-import com.vaadin.server.*;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.communication.PushMode;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.vaadin.spring.VaadinUI;
 import org.vaadin.spring.i18n.I18N;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -28,7 +26,7 @@ import java.util.*;
  */
 @VaadinUI
 @Push(value = PushMode.MANUAL, transport = Transport.LONG_POLLING)
-@Title("Sharingan")
+@Title("Sharingan :: LogView")
 @Theme("default")
 public class MainUI extends UI {
 
@@ -40,18 +38,16 @@ public class MainUI extends UI {
     private OpenFile openFile;
     @Autowired
     private Configuration configuration;
-    @Value("${logviewer.path}")
-    private String path;
 
     private static final ThemeResource ICON_GREEN = new ThemeResource("img/circle-green_.png");
     private static final ThemeResource ICON_YELLOW = new ThemeResource("img/circle-yellow_.png");
 
     private TabSheet contentPanel;
     private Map<File, TabFile> files;
+    private MenuBar.MenuItem menuRecents;
 
     @Override
     protected void init(final VaadinRequest request) {
-        Page.getCurrent().setTitle("Sharingan - Root: " + path);
         this.files = new HashMap<File, TabFile>();
         buildLayout();
         new InitializerThread().start();
@@ -82,22 +78,24 @@ public class MainUI extends UI {
                                 addItem(i18n.get("label.button.addfile"), new Command() {
                                     @Override
                                     public void menuSelected(MenuItem menuItem) {
-                                        openFile.showDialog(getUI(), path, new Property.ValueChangeListener() {
+                                        openFile.showDialog(getUI(), new Property.ValueChangeListener() {
                                             @Override
                                             public void valueChange(Property.ValueChangeEvent event) {
                                                 final File file = (File) event.getProperty().getValue();
+                                                configuration.addRecentFile(file.getAbsolutePath());
                                                 tail(file);
+                                                loadRecentFiles();
+
                                             }
                                         });
                                     }
                                 });
 
-                                MenuItem recents =  addItem(i18n.get("label.button.addfilerecent"), null);
-                                recents.addItem("...", null);
+                                menuRecents = addItem(i18n.get("label.button.addfilerecent"), null);
+                                loadRecentFiles();
                             }
                         });
 
-                        addComponent(new Label("<b>Root:</b> " + path, ContentMode.HTML));
                         addComponent(contentPanel);
                         setExpandRatio(contentPanel, 1.0f);
                         setSizeFull();
@@ -122,11 +120,30 @@ public class MainUI extends UI {
             TabFile tabFile = new TabFile(tailService, i18n, file);
             this.files.put(file, tabFile);
             TabSheet.Tab tab = contentPanel.addTab(tabFile, tabFile.getFileName(), ICON_GREEN);
+            tab.setDescription(file.getAbsolutePath());
             tab.setClosable(true);
             tabFile.setTab(tab);
             contentPanel.setSelectedTab(tabFile);
         } else {
             contentPanel.setSelectedTab(this.files.get(file));
+        }
+
+    }
+
+    private void loadRecentFiles(){
+        final Set<String> files = configuration.getRecentFiles();
+
+        if (menuRecents.getChildren() != null){
+            menuRecents.getChildren().clear();
+        }
+
+        for (final String file : files) {
+            menuRecents.addItem(file, new MenuBar.Command() {
+                @Override
+                public void menuSelected(MenuBar.MenuItem menuItem) {
+                    tail(new File(file));
+                }
+            });
         }
 
     }

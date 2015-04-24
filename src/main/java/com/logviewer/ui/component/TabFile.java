@@ -53,6 +53,7 @@ public class TabFile extends VerticalLayout {
         this.fileContent.setId(this.fileId);
         this.fileContent.setStyleName("logcontent");
 
+        addComponent(new Label(file.getAbsolutePath()));
         addComponent(new MenuBar() {
             {
                 setWidth(100, Unit.PERCENTAGE);
