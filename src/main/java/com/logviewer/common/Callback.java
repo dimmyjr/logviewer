@@ -6,6 +6,6 @@ package com.logviewer.common;
  */
 public interface Callback<T> {
 
-	void execute(T value);
+	void execute(T value, boolean endFile);
 
 }

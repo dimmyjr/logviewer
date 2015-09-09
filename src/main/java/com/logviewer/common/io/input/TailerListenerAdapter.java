@@ -28,7 +28,7 @@ public class TailerListenerAdapter implements TailerListener {
 	 *
 	 * @param line the line.
 	 */
-	public void handle(String line) {
+	public void handle(String line, boolean endfile) {
 	}
 
 	/**

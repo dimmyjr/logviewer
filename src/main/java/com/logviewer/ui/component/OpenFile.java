@@ -4,15 +4,13 @@ import com.logviewer.Configuration;
 import com.logviewer.common.io.filter.LogFilter;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.FilesystemContainer;
-import com.vaadin.event.FieldEvents;
 import com.vaadin.server.Sizeable;
+import com.vaadin.shared.ui.MultiSelectMode;
 import com.vaadin.ui.*;
-import com.vaadin.ui.Component;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.*;
-import org.vaadin.spring.i18n.I18N;
 
 import java.io.File;
+import java.util.Set;
 
 /**
  * Created by 953682 on 16/04/2015.
@@ -20,14 +18,13 @@ import java.io.File;
 @org.springframework.stereotype.Component
 public class OpenFile {
     private Window dialog;
-    private FilesystemContainer container;
     private Property.ValueChangeListener changeListener;
-    private File file;
+    private File[] files;
+    private TreeTable table;
     @Autowired
     private I18N i18n;
     @Autowired
     private Configuration configuration;
-
 
 
     public void showDialog(UI currentUI, Property.ValueChangeListener changeListener) {
@@ -46,44 +43,57 @@ public class OpenFile {
 
 
     private Component buildContetDialog() {
-		final TreeTable table = new TreeTable("") {
+        this.table = new TreeTable("") {
             {
                 addStyleName("small compact");
                 setSizeFull();
                 setImmediate(true);
                 setSelectable(true);
+                setMultiSelect(true);
+                setMultiSelectMode(MultiSelectMode.DEFAULT);
                 addValueChangeListener(new ValueChangeListener() {
                     @Override
                     public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
-                        file = (File) valueChangeEvent.getProperty().getValue();
+                        if (valueChangeEvent.getProperty().getValue() instanceof File) {
+                            files = new File[]{(File) valueChangeEvent.getProperty().getValue()};
+                        } else {
+                            final Set list = (Set) valueChangeEvent.getProperty().getValue();
+                            files = (File[]) list.toArray(new File[list.size()]);
+                        }
                     }
                 });
             }
         };
 
-        ComboBox comboRoots = new ComboBox(i18n.get("label.load.root"), configuration.getRoots());
-        comboRoots.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        comboRoots.setInputPrompt(i18n.get("label.load.rootinput"));
-        comboRoots.setNullSelectionAllowed(false);
-        comboRoots.addValueChangeListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                final File root = new File(event.getProperty().getValue().toString());
-                table.setContainerDataSource(new FilesystemContainer(root, new LogFilter(), true));
-                table.setItemIconPropertyId("Icon");
-                table.setVisibleColumns(new Object[]{"Name", "Size"});
-                table.refreshRowCache();
-            }
-        });
-
         VerticalLayout panelContent = new VerticalLayout();
         panelContent.setSpacing(true);
-		panelContent.setMargin(true);
-		panelContent.setSizeFull();
+        panelContent.setMargin(true);
+        panelContent.setSizeFull();
         panelContent.setId("panel-content");
-        panelContent.addComponent(comboRoots);
+
+
+        if (configuration.getRoots().size() > 1) {
+            ComboBox comboRoots = new ComboBox(i18n.get("label.load.root"), configuration.getRoots());
+            comboRoots.setWidth(100, Sizeable.Unit.PERCENTAGE);
+            comboRoots.setInputPrompt(i18n.get("label.load.rootinput"));
+            comboRoots.setNullSelectionAllowed(false);
+            comboRoots.addValueChangeListener(new Property.ValueChangeListener() {
+                @Override
+                public void valueChange(Property.ValueChangeEvent event) {
+                    final File root = new File(event.getProperty().getValue().toString());
+                    refreshTable(root, table);
+                }
+            });
+            panelContent.addComponent(comboRoots);
+
+
+        } else {
+            final File root = new File(configuration.getRoots().iterator().next());
+            refreshTable(root, table);
+        }
+
         panelContent.addComponent(table);
-		panelContent.setExpandRatio(table, 1.0f);
+        panelContent.setExpandRatio(table, 1.0f);
         panelContent.addComponent(new HorizontalLayout() {
             {
                 setSpacing(true);
@@ -96,7 +106,7 @@ public class OpenFile {
                                 return new Property() {
                                     @Override
                                     public Object getValue() {
-                                        return file;
+                                        return files;
                                     }
 
                                     @Override
@@ -135,5 +145,13 @@ public class OpenFile {
         });
 
         return panelContent;
+    }
+
+    private void refreshTable(File root, TreeTable table) {
+        table.setContainerDataSource(new FilesystemContainer(root, new LogFilter(), true));
+        table.setItemIconPropertyId("Icon");
+        table.setVisibleColumns(new Object[]{"Name", "Size"});
+        table.refreshRowCache();
+
     }
 }

@@ -32,7 +32,7 @@ public interface TailerListener {
 	 *
 	 * @param line the line.
 	 */
-	void handle(String line);
+	void handle(String line, boolean endFile);
 
 	/**
 	 * Handles an Exception .

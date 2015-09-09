@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2015$ Cardif.
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of Cardif
- * ("Confidential Information"). You shall not disclose such Confidential
- * Information and shall use it only in accordance with the terms of the
- * license agreement you entered into with Cardif.
- */
 package com.logviewer.ui.component;
 
 /**
@@ -15,6 +6,8 @@ package com.logviewer.ui.component;
 @SuppressWarnings("serial")
 @com.vaadin.annotations.JavaScript({"tailView.js"})
 public class TailView extends com.vaadin.ui.AbstractJavaScriptComponent {
+
+    private int countLines = 0;
 
     public TailView(final String text) {
         add(text);
@@ -32,13 +25,23 @@ public class TailView extends com.vaadin.ui.AbstractJavaScriptComponent {
 
     public void add(String value){
         getState().value = value;
+        countLines++;
     }
 
     public void clear(){
+        countLines = 0;
         setText("");
     }
 
     public void setScroll(boolean scroll){
         getState().scroll = scroll;
+    }
+
+    public int getCountLines() {
+        return countLines;
+    }
+
+    public void setCountLines(int countLines) {
+        this.countLines = countLines;
     }
 }

@@ -2,10 +2,10 @@ package com.logviewer.service.impl;
 
 import java.io.File;
 
-import com.logviewer.common.Callback;
 import com.logviewer.common.io.input.Tailer;
-import com.logviewer.common.io.input.TailerListener;
 import com.logviewer.model.Tail;
+import com.logviewer.common.Callback;
+import com.logviewer.common.io.input.TailerListener;
 import com.logviewer.model.TailTaskReference;
 import com.logviewer.service.TailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +35,11 @@ public class TailServiceImpl implements TailService {
 
 		final TailerListener listener = new TailerListenerAdapter() {
 			@Override
-			public void handle(final String line) {
-				callback.execute(line);
+			public void handle(final String line, boolean endFile) {
+				callback.execute(line, endFile);
 			}
+
+
 		};
 
 		Tailer tailer = new Tailer(file, listener, DELAY, true, numberOfLastLines);

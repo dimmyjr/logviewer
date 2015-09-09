@@ -2,6 +2,8 @@ package com.logviewer.ui;
 
 import com.logviewer.Configuration;
 import com.logviewer.service.TailService;
+import com.logviewer.ui.component.Highlight;
+import com.logviewer.ui.component.I18N;
 import com.logviewer.ui.component.OpenFile;
 import com.logviewer.ui.component.TabFile;
 import com.vaadin.annotations.Push;
@@ -12,10 +14,10 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.ui.Transport;
+import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.spring.VaadinUI;
-import org.vaadin.spring.i18n.I18N;
 
 import java.io.File;
 import java.util.*;
@@ -24,12 +26,12 @@ import java.util.*;
  * @author Diego Schmidt
  * @since 03/10/2014
  */
-@VaadinUI
+@SpringUI
 @Push(value = PushMode.MANUAL, transport = Transport.LONG_POLLING)
-@Title("Sharingan :: LogView")
+@Title("LogViewer")
 @Theme("default")
+@Slf4j
 public class MainUI extends UI {
-
     @Autowired
     private I18N i18n;
     @Autowired
@@ -38,6 +40,8 @@ public class MainUI extends UI {
     private OpenFile openFile;
     @Autowired
     private Configuration configuration;
+    @Autowired
+    private Highlight highlight;
 
     private static final ThemeResource ICON_GREEN = new ThemeResource("img/circle-green_.png");
     private static final ThemeResource ICON_YELLOW = new ThemeResource("img/circle-yellow_.png");
@@ -52,7 +56,6 @@ public class MainUI extends UI {
         buildLayout();
         new InitializerThread().start();
     }
-
 
     private void buildLayout() {
         contentPanel = new TabSheet();
@@ -72,6 +75,13 @@ public class MainUI extends UI {
             {
                 final VerticalLayout contentLayout = new VerticalLayout() {
                     {
+                        addComponent(new HorizontalLayout(){
+                            {
+                                setHeightUndefined();
+                                addComponent(new Image(null, new ThemeResource("img/logo.png")));
+                            }
+
+                        });
                         addComponent(new MenuBar() {
                             {
                                 setWidth(100, Unit.PERCENTAGE);
@@ -81,9 +91,13 @@ public class MainUI extends UI {
                                         openFile.showDialog(getUI(), new Property.ValueChangeListener() {
                                             @Override
                                             public void valueChange(Property.ValueChangeEvent event) {
-                                                final File file = (File) event.getProperty().getValue();
-                                                configuration.addRecentFile(file.getAbsolutePath());
-                                                tail(file);
+                                                final File[] files = (File[]) event.getProperty().getValue();
+
+                                                for (File file : files) {
+                                                    configuration.addRecentFile(file.getAbsolutePath());
+                                                    tail(file);
+                                                }
+
                                                 loadRecentFiles();
 
                                             }
@@ -117,12 +131,7 @@ public class MainUI extends UI {
 //        }
 
         if (!files.containsKey(file)) {
-            TabFile tabFile = new TabFile(tailService, i18n, file);
-            this.files.put(file, tabFile);
-            TabSheet.Tab tab = contentPanel.addTab(tabFile, tabFile.getFileName(), ICON_GREEN);
-            tab.setDescription(file.getAbsolutePath());
-            tab.setClosable(true);
-            tabFile.setTab(tab);
+            TabFile tabFile = createTabFile(file);
             contentPanel.setSelectedTab(tabFile);
         } else {
             contentPanel.setSelectedTab(this.files.get(file));
@@ -130,10 +139,20 @@ public class MainUI extends UI {
 
     }
 
-    private void loadRecentFiles(){
+    private TabFile createTabFile(File file) {
+        TabFile tabFile = new TabFile(tailService, i18n, highlight, file);
+        this.files.put(file, tabFile);
+        TabSheet.Tab tab = contentPanel.addTab(tabFile, tabFile.getFileName(), ICON_GREEN);
+        tab.setDescription(file.getAbsolutePath());
+        tab.setClosable(true);
+        tabFile.setTab(tab);
+        return tabFile;
+    }
+
+    private void loadRecentFiles() {
         final Set<String> files = configuration.getRecentFiles();
 
-        if (menuRecents.getChildren() != null){
+        if (menuRecents.getChildren() != null) {
             menuRecents.getChildren().clear();
         }
 
@@ -190,7 +209,7 @@ public class MainUI extends UI {
                             }
                             remove.clear();
 
-                            if (push){
+                            if (push) {
                                 push();
                             }
 
@@ -198,7 +217,7 @@ public class MainUI extends UI {
                     });
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                log.error(ex.getMessage());
             }
         }
     }
