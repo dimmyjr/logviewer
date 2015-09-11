@@ -1,7 +1,8 @@
-package com.logviewer.ui.component;
+package com.logviewer.ui.dialog;
 
 import com.logviewer.Configuration;
 import com.logviewer.common.io.filter.LogFilter;
+import com.logviewer.ui.component.I18N;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.FilesystemContainer;
 import com.vaadin.server.Sizeable;

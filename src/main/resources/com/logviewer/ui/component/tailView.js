@@ -3,7 +3,8 @@ com_logviewer_ui_component_TailView = function() {
 	var e = this.getElement();
 	var scroll = false;
 
-	e.innerHTML = "<pre></pre>";
+	e.innerHTML = "";
+	var content = e;
 
 	this.onStateChange = function() {
 		scroll = this.getState().scroll;
@@ -16,17 +17,17 @@ com_logviewer_ui_component_TailView = function() {
 	}
 
 	this.setText = function (value){
-		e.getElementsByTagName("pre")[0].innerHTML = value;
+		content.innerHTML = value;
 		this.scroll();
 	}
 
 	this.add = function (value){
-	    e.getElementsByTagName("pre")[0].innerHTML += value;
+	    content.innerHTML += value;
 	    this.scroll();
 	}
 
 	this.clear = function (value){
-        e.getElementsByTagName("pre")[0].innerHTML = '';
+        content.innerHTML = '';
     }
 
 	this.scroll = function(){

@@ -19,4 +19,5 @@ public interface TailService {
 
 	boolean stopTail(Tail tail);
 
+    void loadLastMinut(final String path, int count);
 }

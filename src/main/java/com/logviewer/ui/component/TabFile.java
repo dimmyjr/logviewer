@@ -5,6 +5,8 @@ import com.logviewer.common.Callback;
 import com.logviewer.common.io.input.ReversedLinesFileReader;
 import com.logviewer.model.Tail;
 import com.logviewer.service.TailService;
+import com.logviewer.ui.dialog.CounterException;
+import com.logviewer.ui.dialog.FilterLog;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.ResourceReference;

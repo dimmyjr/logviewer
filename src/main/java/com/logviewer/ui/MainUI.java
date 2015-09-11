@@ -4,7 +4,7 @@ import com.logviewer.Configuration;
 import com.logviewer.service.TailService;
 import com.logviewer.ui.component.Highlight;
 import com.logviewer.ui.component.I18N;
-import com.logviewer.ui.component.OpenFile;
+import com.logviewer.ui.dialog.OpenFile;
 import com.logviewer.ui.component.TabFile;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
@@ -75,7 +75,7 @@ public class MainUI extends UI {
             {
                 final VerticalLayout contentLayout = new VerticalLayout() {
                     {
-                        addComponent(new HorizontalLayout(){
+                        addComponent(new HorizontalLayout() {
                             {
                                 setHeightUndefined();
                                 addComponent(new Image(null, new ThemeResource("img/logo.png")));
@@ -107,6 +107,19 @@ public class MainUI extends UI {
 
                                 menuRecents = addItem(i18n.get("label.button.addfilerecent"), null);
                                 loadRecentFiles();
+
+                                addItem(i18n.get("label.button.loadlast1minut"), new Command() {
+                                    @Override
+                                    public void menuSelected(MenuItem menuItem) {
+                                    }
+                                });
+
+                                addItem(i18n.get("label.button.loadlast5minut"), new Command() {
+                                    @Override
+                                    public void menuSelected(MenuItem menuItem) {
+
+                                    }
+                                });
                             }
                         });
 
@@ -164,7 +177,10 @@ public class MainUI extends UI {
                 }
             });
         }
+    }
 
+    private void loadLastMinut(int count) {
+          tailService.loadLastMinut("", count);
     }
 
 

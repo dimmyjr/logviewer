@@ -1,5 +1,6 @@
-package com.logviewer.ui.component;
+package com.logviewer.ui.dialog;
 
+import com.logviewer.ui.component.I18N;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
