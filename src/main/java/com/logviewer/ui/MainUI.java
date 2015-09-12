@@ -4,6 +4,7 @@ import com.logviewer.Configuration;
 import com.logviewer.service.TailService;
 import com.logviewer.ui.component.Highlight;
 import com.logviewer.ui.component.I18N;
+import com.logviewer.ui.dialog.LastMinute;
 import com.logviewer.ui.dialog.OpenFile;
 import com.logviewer.ui.component.TabFile;
 import com.vaadin.annotations.Push;
@@ -28,7 +29,7 @@ import java.util.*;
  */
 @SpringUI
 @Push(value = PushMode.MANUAL, transport = Transport.LONG_POLLING)
-@Title("LogViewer")
+@Title("Sharingan LogViewer Online")
 @Theme("default")
 @Slf4j
 public class MainUI extends UI {
@@ -42,6 +43,8 @@ public class MainUI extends UI {
     private Configuration configuration;
     @Autowired
     private Highlight highlight;
+    @Autowired
+    private LastMinute lastMinute;
 
     private static final ThemeResource ICON_GREEN = new ThemeResource("img/circle-green_.png");
     private static final ThemeResource ICON_YELLOW = new ThemeResource("img/circle-yellow_.png");
@@ -108,16 +111,17 @@ public class MainUI extends UI {
                                 menuRecents = addItem(i18n.get("label.button.addfilerecent"), null);
                                 loadRecentFiles();
 
-                                addItem(i18n.get("label.button.loadlast1minut"), new Command() {
+                                addItem(i18n.get("label.button.loadlast1minute"), new Command() {
                                     @Override
                                     public void menuSelected(MenuItem menuItem) {
+                                        lastMinute.showDialog(1);
                                     }
                                 });
 
-                                addItem(i18n.get("label.button.loadlast5minut"), new Command() {
+                                addItem(i18n.get("label.button.loadlast5minute"), new Command() {
                                     @Override
                                     public void menuSelected(MenuItem menuItem) {
-
+                                        lastMinute.showDialog(5);
                                     }
                                 });
                             }
@@ -180,7 +184,7 @@ public class MainUI extends UI {
     }
 
     private void loadLastMinut(int count) {
-          tailService.loadLastMinut("", count);
+          tailService.loadLastMinute("", count);
     }
 
 

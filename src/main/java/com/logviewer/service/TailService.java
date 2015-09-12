@@ -1,6 +1,7 @@
 package com.logviewer.service;
 
 import java.io.File;
+import java.util.Map;
 
 import com.logviewer.common.Callback;
 import com.logviewer.model.Tail;
@@ -19,5 +20,5 @@ public interface TailService {
 
 	boolean stopTail(Tail tail);
 
-    void loadLastMinut(final String path, int count);
+    Map<String, String> loadLastMinute(final String path, int minutes);
 }

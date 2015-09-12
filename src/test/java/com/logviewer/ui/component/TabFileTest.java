@@ -1,7 +1,7 @@
 package com.logviewer.ui.component;
 
 /**
- * Created by 953682 on 28/04/2015.
+ * Created by Dimmy Junior on 28/04/2015.
  */
 public class TabFileTest {
 

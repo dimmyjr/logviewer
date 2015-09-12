@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by 953682 on 22/04/2015.
+ * Created by Dimmy Junior on 22/04/2015.
  */
 @Component
 @Slf4j
@@ -31,14 +31,14 @@ public class Configuration {
     @PostConstruct
     public void load() {
         if ((roots == null || roots.isEmpty() || roots.equalsIgnoreCase(PATH_ROOTS_KEY))
-                && !getWebSpherePath().isEmpty() ){
+                && !getWebSpherePath().isEmpty()) {
             roots = getWebSpherePath().concat("/").concat("logs");
         }
 
         this.recentFiles = new HashSet<String>();
     }
 
-    private String getWebSpherePath() {
+    protected String getWebSpherePath() {
         return System.getProperty("user.install.root") == null ? "" : System.getProperty("user.install.root");
     }
 
@@ -51,7 +51,15 @@ public class Configuration {
     }
 
     public Set<String> getRoots() {
-        return (roots != null) ? new HashSet<String>(Arrays.asList(roots.split(",")))  : new HashSet<String>();
+        return (roots != null) ? new HashSet<String>(Arrays.asList(roots.split(","))) : new HashSet<String>();
+    }
+
+    public String getRoot() {
+        if (roots != null && !roots.isEmpty() && !roots.contains(",")) {
+            return roots;
+        }
+
+        throw new RuntimeException("has more 1 roots");
     }
 
 }

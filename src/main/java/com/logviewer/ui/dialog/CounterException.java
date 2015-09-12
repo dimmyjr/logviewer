@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by 953682 on 28/04/2015.
+ * Created by Dimmy Junior on 28/04/2015.
  */
 public class CounterException {
     private static final String REGEX_EXCEPTION = "^([\\w&&\\D]([\\w\\.]*[\\w])?)\\: ";

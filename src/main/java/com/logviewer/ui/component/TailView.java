@@ -1,7 +1,7 @@
 package com.logviewer.ui.component;
 
 /**
- * Created by 953682 on 20/04/2015.
+ * Created by Dimmy Junior on 20/04/2015.
  */
 @SuppressWarnings("serial")
 @com.vaadin.annotations.JavaScript({"tailView.js"})

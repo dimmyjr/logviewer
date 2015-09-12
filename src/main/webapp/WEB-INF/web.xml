@@ -42,8 +42,8 @@
     </servlet-mapping>
 
     <resource-env-ref>
-        <description>LogViewer Configuration</description>
-        <resource-env-ref-name>config/logviewer2</resource-env-ref-name>
+        <description>Sharigan LogViewer Online Configuration</description>
+        <resource-env-ref-name>config/sharingan</resource-env-ref-name>
         <resource-env-ref-type>java.util.Properties</resource-env-ref-type>
     </resource-env-ref>
 

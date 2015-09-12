@@ -21,9 +21,7 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +34,7 @@ import java.util.regex.Pattern;
 public class TailServiceImpl implements TailService {
 
     public static final int DELAY = 1000;
+    public static final String EXTRACT_DATE = "(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.]\\d{2,4} \\d{2}:\\d{2}";
 
     @Autowired
     private ThreadPoolTaskScheduler scheduler;
@@ -44,7 +43,7 @@ public class TailServiceImpl implements TailService {
     private ThreadPoolTaskExecutor taskExecutor;
 
     public TailServiceImpl() {
-        TimeZone.setDefault(TimeZone.getTimeZone("America/Lima"));
+
     }
 
     @Override
@@ -89,55 +88,83 @@ public class TailServiceImpl implements TailService {
     }
 
     @Override
-    public void loadLastMinut(final String path, int count) {
+    public Map<String, String> loadLastMinute(final String path, int minutes) {
+        Map<String, String> result = new HashMap<String, String>();
         try {
             StringBuffer sb = new StringBuffer();
 
-            Long nowMinus = new Date().getTime() - (60L * 1000L * count);
+            Long nowMinus = new Date().getTime() - (60L * 1000L * minutes);
             final FilesystemContainer container = new FilesystemContainer(new File(path),
                                                                           new LogFilter(),
                                                                           true);
 
             for (File file : container.getItemIds()) {
-                if (file.isDirectory() || !(file.lastModified() >= nowMinus)) {
+                if (file.isDirectory()) {
                     continue;
                 }
 
-                sb.append("###############################################################################\n");
-                sb.append("#########   " + String.format("%-57s", file.getName()) + " #########\n");
-                sb.append("###############################################################################\n\n");
+                sb.setLength(0);
+
+//                sb.append("###############################################################################\n");
+//                sb.append("#########   " + String.format("%-57s", file.getName()) + " #########\n");
+//                sb.append("###############################################################################\n\n");
 
                 ReversedLinesFileReader fileReader = new ReversedLinesFileReader(new RandomAccessFile(file, "r"));
                 final List<String> previousLines = Lists.newArrayList();
                 String lineRead;
+                boolean hasDate = false;
 
                 while ((lineRead = fileReader.readLine()) != null) {
                     final Date date = extractDate(lineRead);
-                    if (date != null && date.getTime() < nowMinus) {
-                        for (String line : Lists.reverse(previousLines)) {
-                            sb.append(line + "\n");
-                        }
-                        previousLines.clear();
+                    if (isValidDate(date, nowMinus)){
+                        hasDate = true;
+                    }
 
+                    if (isFirstTime(nowMinus, date) && hasDate) {
+                        validFile(result, sb, file, previousLines);
                         break;
                     }
                     previousLines.add(lineRead);
                 }
             }
 
-            System.out.println(sb.toString());
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+
+        return result;
+    }
+
+    private boolean isValidDate(Date date, Long nowMinus) {
+        return date != null && date.getTime() > nowMinus;
+    }
+
+    private void validFile(final Map<String, String> result, final StringBuffer sb, final File file, final List<String> previousLines) {
+        for (String line : Lists.reverse(previousLines)) {
+            sb.append(line + "\n");
+        }
+        result.put(file.getName(), sb.toString());
+        previousLines.clear();
+    }
+
+    private boolean isFirstTime(Long nowMinus, Date date) {
+        return date != null && date.getTime() <= nowMinus;
     }
 
     private Date extractDate(String line) throws ParseException {
         int count = 0;
         String[] allMatches = new String[2];
-        Matcher m = Pattern.compile("(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\\d\\d\\s\\d\\d:\\d\\d").matcher(
-                line);
+        Matcher m = Pattern.compile(EXTRACT_DATE).matcher(line);
         if (m.find()) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+            String format;
+            final String text = m.group();
+
+            if (text.length() == 16){
+                format = "dd/MM/yyyy hh:mm";
+            } else {
+                format = "dd/MM/yy hh:mm";
+            }
+            SimpleDateFormat dateFormat = new SimpleDateFormat(format);
             return dateFormat.parse(m.group());
         }
         return null;

@@ -14,7 +14,7 @@ import java.io.File;
 import java.util.Set;
 
 /**
- * Created by 953682 on 16/04/2015.
+ * Created by Dimmy Junior on 16/04/2015.
  */
 @org.springframework.stereotype.Component
 public class OpenFile {
